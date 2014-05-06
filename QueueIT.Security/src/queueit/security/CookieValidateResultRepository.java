@@ -8,7 +8,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import javax.servlet.http.*;
 import javax.xml.bind.DatatypeConverter;
 
@@ -132,7 +131,7 @@ public class CookieValidateResultRepository extends ValidateResultRepositoryBase
     
     private void addCookie(Cookie cookie, HttpServletResponse response)
     {
-        cookie.setHttpOnly(true);      
+        //cookie.setHttpOnly(true);   commented out so it compiles under java 1.6
         cookie.setMaxAge(defaultCookieExpiration);
         if (defaultCookieDomain != null)
             cookie.setDomain(defaultCookieDomain);

@@ -37,17 +37,16 @@ import java.util.regex.Pattern;
  * @see UriComponentsBuilder
  */
 public abstract class UriComponents implements Serializable {
+    private static final long serialVersionUID = 3168664342759698847L;
 
 	private static final String DEFAULT_ENCODING = "UTF-8";
 
 	/** Captures URI template variable names. */
 	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
-
 	private final String scheme;
 
 	private final String fragment;
-
 
 	protected UriComponents(String scheme, String fragment) {
 		this.scheme = scheme;

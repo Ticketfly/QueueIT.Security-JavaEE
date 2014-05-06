@@ -4,6 +4,8 @@ import java.net.URI;
 
 public abstract class KnownUserException extends SecurityException
 {
+    private static final long serialVersionUID = 2934794390370466667L;
+
     private URI originalUrl;
     private URI validationUrl;
 

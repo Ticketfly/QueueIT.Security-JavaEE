@@ -1,6 +1,7 @@
 package queueit.security;
 
 public class SessionValidationException extends SecurityException {
+    private static final long serialVersionUID = 559996830469308237L;
     private IQueue queue;
     
     public IQueue getQueue() {

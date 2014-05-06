@@ -86,8 +86,6 @@ public class QueueFactory {
     {
         String key = generateKey(customerId, eventId);
 
-        Map<String, Queue> queues = loadedQueues;
-
         Queue queue = loadedQueues.get(key);
         
         if (queue != null)

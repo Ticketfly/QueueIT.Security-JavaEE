@@ -91,8 +91,13 @@ public class KnownUserFactory {
         throws InvalidKnownUserUrlException, InvalidKnownUserHashException {
         return verifyMd5Hash(secretKey, urlProvider, null);
     }
-            
-    public static IKnownUser verifyMd5Hash(String secretKey, IKnownUserUrlProvider urlProvider, String querystringPrefix) 
+
+    public static IKnownUser verifyMd5Hash(IKnownUserUrlProvider urlProvider)
+            throws InvalidKnownUserUrlException, InvalidKnownUserHashException {
+        return verifyMd5Hash(null, urlProvider, null);
+    }
+
+    public static IKnownUser verifyMd5Hash(String secretKey, IKnownUserUrlProvider urlProvider, String querystringPrefix)
             throws InvalidKnownUserUrlException, InvalidKnownUserHashException {
 
         if ((secretKey == null) || (secretKey.isEmpty())) {

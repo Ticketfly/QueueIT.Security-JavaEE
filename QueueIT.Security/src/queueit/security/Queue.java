@@ -4,15 +4,9 @@ import java.util.Locale;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
-import queueit.security.uribuilder.UriComponents;
 
 import queueit.security.uribuilder.UriComponentsBuilder;
 

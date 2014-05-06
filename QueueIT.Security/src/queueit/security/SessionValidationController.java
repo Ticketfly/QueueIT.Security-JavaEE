@@ -1,5 +1,6 @@
 package queueit.security;
 
+import javax.servlet.http.HttpSession;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Date;
@@ -208,6 +209,15 @@ public class SessionValidationController {
     public static IValidateResult validateRequest(
             String customerId,
             String eventId,
+            URI targetUrl,
+            HttpSession httpSession,
+            IKnownUserUrlProvider knownUserUrlProvider) {
+        return validateRequestFromIds(customerId, eventId, null, targetUrl, null, null, null, null, httpSession, knownUserUrlProvider);
+    }
+
+    public static IValidateResult validateRequest(
+            String customerId,
+            String eventId,
             Boolean includeTargetUrl,
             Boolean sslEnabled) {
         return validateRequestFromIds(customerId, eventId, includeTargetUrl, null, sslEnabled, null, null, null);
@@ -290,6 +300,22 @@ public class SessionValidationController {
             String domainAlias,
             Locale language,
             String layoutName) {
+
+        return validateRequestFromIds(customerId, eventId, includeTargetUrl, targetUrl, sslEnabled, domainAlias, language, layoutName, null, null);
+    }
+
+    private static IValidateResult validateRequestFromIds(
+            String customerId,
+            String eventId,
+            Boolean includeTargetUrl,
+            URI targetUrl,
+            Boolean sslEnabled,
+            String domainAlias,
+            Locale language,
+            String layoutName,
+            HttpSession httpSession,
+            IKnownUserUrlProvider knownUserUrlProvider) {
+
         if (customerId == null || customerId.isEmpty()) {
             throw new IllegalArgumentException("Customer ID is required");
         }
@@ -306,7 +332,9 @@ public class SessionValidationController {
                 targetUrl,
                 domainAlias != null ? domainAlias : queue.getDefaultDomainAlias(),
                 language != null ? language : queue.getDefaultLanguage(),
-                layoutName != null ? layoutName : queue.getDefaultLayoutName());
+                layoutName != null ? layoutName : queue.getDefaultLayoutName(),
+                httpSession,
+                knownUserUrlProvider);
     }
 
     private static IValidateResult validateRequest(
@@ -317,22 +345,42 @@ public class SessionValidationController {
             String domainAlias,
             Locale language,
             String layoutName) {
+        return validateRequest(queue, sslEnabled, includeTargetUrl, targetUrl, domainAlias, language, layoutName, null, null);
+    }
+
+    private static IValidateResult validateRequest(
+            Queue queue,
+            Boolean sslEnabled,
+            Boolean includeTargetUrl,
+            URI targetUrl,
+            String domainAlias,
+            Locale language,
+            String layoutName,
+            HttpSession httpSession,
+            IKnownUserUrlProvider knownUserUrlProvider) {
         IValidateResult sessionObject = null;
         try {
-            sessionObject = defaultValidationResultProviderFactory.call().getValidationResult(queue);
+            IValidateResultRepository repo = defaultValidationResultProviderFactory.call();
+            if (httpSession != null && repo instanceof SessionValidateResultRepository) {
+                SessionValidateResultRepository sessionRepo = (SessionValidateResultRepository) repo;
+                sessionObject = sessionRepo.getValidationResult(queue, httpSession);
+            } else {
+                sessionObject = repo.getValidationResult(queue);
+            }
         } catch (Exception ex) {
             // ignore
         }
         if (sessionObject != null) {
             AcceptedConfirmedResult confirmedResult = (AcceptedConfirmedResult) sessionObject;
-            if (confirmedResult != null) {
-                return new AcceptedConfirmedResult(queue, confirmedResult.getKnownUser(), false);
-            }
-
-            return sessionObject;
+            return new AcceptedConfirmedResult(queue, confirmedResult.getKnownUser(), false);
         }
         try {
-            IKnownUser knownUser = KnownUserFactory.verifyMd5Hash();
+            IKnownUser knownUser = null;
+            if (knownUserUrlProvider != null) {
+                knownUser = KnownUserFactory.verifyMd5Hash(knownUserUrlProvider);
+            } else {
+                knownUser = KnownUserFactory.verifyMd5Hash();
+            }
             URI landingPage = null;
             if (knownUser == null) {
                 if (targetUrl != null) {
@@ -357,7 +405,15 @@ public class SessionValidationController {
 
             AcceptedConfirmedResult result = new AcceptedConfirmedResult(queue, knownUser, true);
             try {
-                defaultValidationResultProviderFactory.call().setValidationResult(queue, result);
+
+                IValidateResultRepository repo = defaultValidationResultProviderFactory.call();
+                if (httpSession != null && repo instanceof SessionValidateResultRepository) {
+                    SessionValidateResultRepository sessionRepo = (SessionValidateResultRepository) repo;
+                    sessionRepo.setValidationResult(queue, result, httpSession);
+                } else {
+                    repo.setValidationResult(queue, result);
+                }
+
             } catch (Exception ex) {
                 //ignore
             }
