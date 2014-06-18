@@ -210,9 +210,11 @@ public class SessionValidationController {
             String customerId,
             String eventId,
             URI targetUrl,
+            Boolean sslEnabled,
+            String domainAlias,
             HttpSession httpSession,
             IKnownUserUrlProvider knownUserUrlProvider) {
-        return validateRequestFromIds(customerId, eventId, null, targetUrl, null, null, null, null, httpSession, knownUserUrlProvider);
+        return validateRequestFromIds(customerId, eventId, null, targetUrl, sslEnabled, domainAlias, null, null, httpSession, knownUserUrlProvider);
     }
 
     public static IValidateResult validateRequest(
