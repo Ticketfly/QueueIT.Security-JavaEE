@@ -73,7 +73,7 @@ public class CookieValidateResultRepository extends ValidateResultRepositoryBase
             return null;
         }
             
-        String expectedHash = generateHash(queueId, originalUrl, placeInQueue.toString(), redirectType, timeStamp);
+        String expectedHash = generateHash(queueId, originalUrl, placeInQueue, redirectType, timeStamp);
         
         if (!expectedHash.equals(actualHash))
             return null;
@@ -106,7 +106,7 @@ public class CookieValidateResultRepository extends ValidateResultRepositoryBase
             String redirectType = confirmedResult.getKnownUser().getRedirectType().toString();
             Long timeStamp = confirmedResult.getKnownUser().getTimeStamp().getTime() / 1000;
             
-            String hash = generateHash(queueId, originalUrl, placeInQueue.toString(), redirectType, timeStamp.toString());
+            String hash = generateHash(queueId, originalUrl, placeInQueue, redirectType, timeStamp.toString());
 
             setCookie(queue, queueId, originalUrl, placeInQueue, redirectType, timeStamp.toString(), hash);
         }                
@@ -135,10 +135,10 @@ public class CookieValidateResultRepository extends ValidateResultRepositoryBase
         response.addCookie(cookie);
     }
 
-    private String generateHash(String queueId, String originalUrl, String placeInQueue, String redirectType, String timeStamp) {
+    private String generateHash(String queueId, String originalUrl, Integer placeInQueue, String redirectType, String timeStamp) {
         try {
             StringBuilder sb = new StringBuilder();
-            sb.append(queueId).append(originalUrl).append(placeInQueue).append(redirectType).append(timeStamp).append(KnownUserFactory.getSecretKey());
+            sb.append(queueId).append(originalUrl).append(placeInQueue != null ? placeInQueue.toString() : "0").append(redirectType).append(timeStamp).append(KnownUserFactory.getSecretKey());
                     
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(sb.toString().getBytes("UTF-8"));
